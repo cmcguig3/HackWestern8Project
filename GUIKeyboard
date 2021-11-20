@@ -1,0 +1,17 @@
+package GUI;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class GUIKeyboardBoard extends JFrame {
+
+    public GUIKeyboardBoard(){
+        this.add(new GUIKeyboardDemo());
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setTitle("Snakes");
+        this.pack();
+        this.setVisible(true);
+        this.setLocationRelativeTo(null);
+        this.setResizable(false);
+    }
+}
