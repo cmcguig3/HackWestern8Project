@@ -1,0 +1,185 @@
+package GUI;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.sql.Time;
+import java.util.Random;
+
+public class GUIKeyboardDemo extends JPanel implements ActionListener {
+
+    public int[] xCoordinate = new int[1000 / 25];
+    public int[] yCoordinate = new int[750 / 25];
+    public int snakeLength = 5;
+    public final int squaresSize = 25;
+    public boolean going = false;
+     char direction = 'R';
+    public final int width = 1000;
+    public final int height = 750;
+    public JButton button;
+    public int appleLocationX = 50;
+    public int appleLocationY =50;
+    public int speed = 100;
+    public Timer timer = new Timer(100,this);
+
+    public static void main(String[] args) {
+        new GUIKeyboardBoard();
+    }
+
+    public GUIKeyboardDemo() {
+        this.setPreferredSize(new Dimension(width, height));
+        this.setBackground(Color.ORANGE);
+        this.setFocusable(true);
+        this.addKeyListener(new GUIKeyboard());
+        button = new JButton("Start Game");
+        button.addActionListener(this);
+        this.add(button);
+    }
+
+    public void apple() {
+        appleLocationX =  (int) (Math.random() * (width / squaresSize)) * squaresSize;
+        appleLocationY =  (int) (Math.random() * (height / squaresSize)) * squaresSize;
+    }
+
+    public void addApple(Graphics g) {
+        g.setColor(Color.RED);
+        g.fillOval(appleLocationX, appleLocationY, squaresSize, squaresSize);
+    }
+
+    public boolean ifEaten() {
+        if (xCoordinate[0] == appleLocationX && yCoordinate[0] == appleLocationY) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void start() {
+        timer.start();
+        going = true;
+    }
+
+    public void move() {
+        for (int i = snakeLength; i > 0; i--) {
+            xCoordinate[i] = xCoordinate[i - 1];
+            yCoordinate[i] = yCoordinate[i - 1];
+        }
+        switch (direction) {
+            case ('R'):
+                xCoordinate[0] = xCoordinate[0] + squaresSize;
+                break;
+            case ('L'):
+                xCoordinate[0] = xCoordinate[0] - squaresSize;
+                break;
+            case ('U'):
+                yCoordinate[0] = yCoordinate[0] - squaresSize;
+                break;
+            case ('D'):
+                yCoordinate[0] = yCoordinate[0] + squaresSize;
+                break;
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (going) {
+            move();
+            while (ifEaten() == true) {
+                apple();
+                snakeLength++;
+                speed+=150;
+                timer = new Timer(speed, this);
+            }
+            checkCollisions();
+        }
+        if (!going) {
+            start();
+            button.setEnabled(false);
+            button.setVisible(false);
+        }
+
+        repaint();
+    }
+
+    public void endGame() {
+        going = false;
+        timer.stop();
+    }
+
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        for (int i = 0; i < snakeLength; i++) {
+            if (i == 0) {
+                g.setColor(new Color(81, 0, 180));
+                g.fillRect(xCoordinate[i], yCoordinate[i], squaresSize, squaresSize);
+            } else {
+                g.setColor(new Color(162, 0, 180));
+                g.fillRect(xCoordinate[i], yCoordinate[i], squaresSize, squaresSize);
+            }
+        }
+        addApple(g);
+
+    }
+    public void checkCollisions() {
+        //checks if head collides with body
+        for (int i = snakeLength; i > 0; i--) {
+            if ((xCoordinate[0] == xCoordinate[i]) && (yCoordinate[0] == yCoordinate[i])) {
+                System.exit((0));
+                going = false;
+            }
+        }
+        //check if head touches left border
+        if (xCoordinate[0] < 0) {
+            System.exit((0));
+            going = false;
+        }
+        //check if head touches right border
+        if (xCoordinate[0] > width) {
+            System.exit((0));
+            going = false;
+        }
+        //check if head touches top border
+        if (yCoordinate[0] < 0) {
+            System.exit((0));
+            going = false;
+        }
+        //check if head touches bottom border
+        if (yCoordinate[0] > height) {
+            System.exit((0));
+            going = false;
+        }
+
+        if (!going) {
+            timer.stop();
+        }
+    }
+
+    public class GUIKeyboard extends KeyAdapter {
+        @Override
+        public void keyPressed(KeyEvent e) {
+           int keyCode = e.getKeyCode();
+            switch (keyCode) {
+                case (KeyEvent.VK_RIGHT):
+                    if (direction != 'L') {
+                        direction = 'R';
+                    }
+                    break;
+                case (KeyEvent.VK_LEFT):
+                    if (direction != 'R') {
+                        direction = 'L';
+                    }
+                    break;
+                case (KeyEvent.VK_UP):
+                    if (direction != 'D') {
+                       direction = 'U';
+                    }
+                    break;
+                case (KeyEvent.VK_DOWN):
+                    if (direction != 'U') {
+                        direction = 'D';
+                    }
+                    break;
+            }
+        }
+    }
+}
